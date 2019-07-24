@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet' />
+
+    <!-- XDSoft DateTimePicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+
+
+
+    <title>Карта за ПТП в България</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <style>
+        body { margin:0; padding:0; width: 100%; height: 100%;}
+        #map { position: absolute; top:0; bottom:0; width:100%; }
+
+        #markerbutton {
+            font: 12px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            width: 100px;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
+
+        #searchaddress {
+            font: 15px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            width: 300px;
+            top: 10px;
+            right: 430px;
+            padding: 10px;
+        }
+
+
+
+           * { margin: 0; padding: 0; }
+           p { padding: 10px; }
+           #left { position: absolute; left: 0; top: 0; width: calc(100% - 400px); height: 100%; }
+           #right { position: absolute; right: 0; top: 0; width: 400px; height: 100%; }
+
+
+           .marker {
+           display: block;
+           border: none;
+           border-radius: 50%;
+           background: red;
+           cursor: pointer;
+           padding: 0;
+           }
+
+
+           #ck-button {
+             position: absolute;
+             left: 10px; top: 10px;
+             background-color:#EFEFEF;
+             border-radius:4px;
+             border:1px solid #D0D0D0;
+             overflow:auto;
+             float:left;
+
+           }
+
+
+           #ck-button label {
+               float:left;
+               width:4.0em;
+           }
+
+           #ck-button label span {
+               text-align:center;
+               padding:3px 0px;
+               display:block;
+               border-radius:4px;
+           }
+
+           #ck-button label input {
+               position:absolute;
+               top:-20px;
+           }
+
+           #ck-button input:hover + span {
+               background-color:#efE0E0;
+           }
+
+           #ck-button input:checked + span {
+               background-color:#911;
+               color:#fff;
+           }
+
+           #ck-button input:checked:hover + span {
+               background-color:#c11;
+               color:#fff;
+           }
+
+
+    </style>
+
+</head>
+<body>
+
+
+
+
+<!--
+https://www.mapbox.com/mapbox-gl-js/api/
+-->
+<div id="left">
+  <div id='map'></div>
+</div>
+
+
+
+
+<div id="right" style="padding: 10px;">
+  <form action="{% url 'editor' CityObj.sysname %}" method="post">
+    {% csrf_token %}
+
+
+
+    <div class="form-group">Град
+       <strong>{{ CityObj.cityname }}</strong>
+
+        <!--<select name="city" class="form-control" id="city" required>
+        <option value="" selected>---------</option>
+        <option value="1">Варна</option>
+      </select>-->
+    </div>
+
+    <div class="form-group">Latitude
+        <input type="number" name="latitude" class="form-control form-control-sm" id="latitude" step="any" required>
+    </div>
+
+    <div class="form-group">Longitude
+        <input type="number" name="longitude" class="form-control form-control-sm" id="longitude" step="any" required>
+    </div>
+
+    <div class="form-group">Описание
+        <textarea name="description" cols="40" rows="10" class="form-control form-control-sm" id="description" required></textarea>
+    </div>
+
+    <div class="form-group">Дата и време<br>
+        <input name="datetime" id="datetime" type="text" autocomplete="off" required>
+    </div>
+
+
+    <!-- <div class="form-group">Datetime
+        <input type="text" name="datetime" class="form-control form-control-sm" id="datetime" required>
+    </div> -->
+
+    <div class="form-group">Тип
+        <select name="ptptype" class="form-control form-control-sm" id="ptptype" required>
+          <option value="" selected>---------</option>
+          <option value="1">Пешеходци</option>
+          <option value="2">Кола</option>
+          <option value="3">Велосипед</option>
+          <option value="4">Мотоциклет</option>
+        </select>
+    </div>
+
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="carRedSignal" class="form-check-input" id="carRedSignal">
+        <label class="form-check-label" for="carRedSignal">Червен сигнал (МПС)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="carTurnLeft" class="form-check-input" id="carTurnLeft">
+        <label class="form-check-label" for="carTurnLeft">При завой налява (МПС)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="carTurnRight" class="form-check-input" id="carTurnRight">
+        <label class="form-check-label" for="carTurnLeft">При завой надясно (МПС)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="pedRedSignal" class="form-check-input" id="pedRedSignal">
+        <label class="form-check-label" for="pedRedSignal">Червен сигнал (за пешеходци)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="pedWrongCross" class="form-check-input" id="pedWrongCross">
+        <label class="form-check-label" for="pedWrongCross">Неправилно пресичане (за пешеходци)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="pedKid" class="form-check-input" id="pedKid">
+        <label class="form-check-label" for="pedKid">Постарадали деца (за пешеходци)</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" name="danger" class="form-check-input" id="danger">
+        <label class="form-check-label" for="danger">Ранени и убити</label>
+    </div>
+
+    <div class="form-group" style="font-size: 8pt; color: #aaaaaa">id
+        <input type="number" name="record_id" id="id_record_id" style="color: #aaaaaa; width: 50px" readonly>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary" name="save">Save</button>
+  </form>
+
+<br>
+  {% if user.is_authenticated %}
+    <li>User: {{ user.get_username }}</li>
+    <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+  {% else %}
+    <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+  {% endif %}
+
+</div>
+
+
+<!--<div id="markerbutton">
+  <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off" id="addmarker-button">Add marker</button>
+  <input type="checkbox" name="agree" id="agree" class="form-control">
+</div>-->
+
+
+<input name="search" id="searchaddress" type="text" placeholder="Търсене">
+
+
+
+<div id="ck-button">
+   <label>
+      <input type="checkbox" value="1" id="chbNewMarker"><span>Marker</span>
+   </label>
+</div>
+
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoiZHJpdmVzb2Z0IiwiYSI6ImNqY3hkMzAwNTAwM2IzM28zajFoeG1pamYifQ.w5UaGnR0OMDIa6ARiyWoYQ';
+	var map = new mapboxgl.Map({
+		container: 'map',
+		style: 'mapbox://styles/mapbox/streets-v11',
+		center: [
+      {% if lng %}
+        {{ lng }}
+      {% else %}
+        {{ CityObj.longitude }}
+      {% endif %}
+      ,
+
+      {% if lat %}
+        {{ lat }}
+      {% else %}
+        {{ CityObj.latitude }}
+      {% endif %}
+
+
+    ],
+    //center: [-96, 37.8],
+    zoom: {% if lat %} 17 {% else %} {{ CityObj.zoom }} {% endif %}
+	});
+
+
+
+
+
+
+  map.on('load', function () {
+
+    map.addLayer({
+      'id': 'ptp',
+      'type': 'circle',
+
+      "source": {
+        "type": "geojson",
+
+        "data": {
+          "type": "FeatureCollection",
+          "features": [
+
+            {% if ptp_data %}
+
+                {% for ptp in ptp_data %}
+                    {
+
+                      "type": "Feature",
+                      "geometry": {
+                        "type": "Point",
+                        "coordinates": [{{ptp.longitude}}, {{ptp.latitude}}]
+                      },
+
+                      "properties": {
+                        "id": {{ptp.id}},
+                        "city": {{ ptp.city_id }},
+                        "DateTime": "{{ptp.datetime|date:"d/m/Y H:i"}}",
+                        "ptptype": {{ ptp.ptptype_id }},
+                        "carRedSignal": {{ ptp.carRedSignal|yesno:"1,0" }},
+                        "carTurnLeft": {{ ptp.carTurnLeft|yesno:"1,0" }},
+                        "carTurnRight": {{ ptp.carTurnRight|yesno:"1,0" }},
+                        "pedRedSignal": {{ ptp.pedRedSignal|yesno:"1,0" }},
+                        "pedWrongCross": {{ ptp.pedWrongCross|yesno:"1,0" }},
+                        "pedKid": {{ ptp.pedKid|yesno:"1,0" }},
+                        "danger": {{ ptp.danger|yesno:"1,0" }},
+                        "description": "{{ ptp.description }}",
+                      }
+
+                    },
+                {% endfor %}
+
+            {% endif %}
+
+          ]
+        }
+      },
+
+      'paint': {
+        // make circles larger as the user zooms from z12 to z22
+        'circle-radius': {
+          'base': 1.75,
+          'stops': [[12, 4], [22, 30]]
+        },
+
+        'circle-color': '#dd0000'
+      }
+    });
+
+  });
+
+
+
+
+  map.on('click', 'ptp', function (e) {
+    var url_delete = '{% url "ptp_delete" CityObj.sysname 987654321 %}';
+    url_delete = url_delete.replace('987654321', e.features[0].properties.id.toString());
+
+    new mapboxgl.Popup()
+      .setLngLat(e.features[0].geometry.coordinates)
+      .setHTML(e.features[0].properties.description + '<br><br><a href="'+url_delete+'">Delete?</a>')
+      .addTo(map);
+
+
+      //url_delete = url_delete.replace('ptpid', e.features[0].properties.id.toString());
+
+      //.setHTML(e.features[0].properties.DateTime + '<br>' + e.features[0].properties.description + '<br><br><a href="'+ url_delete +'">Delete?</a>'+ )
+      //.setHTML(e.features[0].properties.DateTime + '<br>' + e.features[0].properties.description);
+
+
+
+      //document.getElementById("id_city").value = e.features[0].properties.city;
+      document.getElementById("longitude").value = e.features[0].geometry.coordinates[0];
+      document.getElementById("latitude").value = e.features[0].geometry.coordinates[1];
+      document.getElementById("datetime").value = e.features[0].properties.DateTime;
+      document.getElementById("description").value = e.features[0].properties.description;
+      document.getElementById("ptptype").value = e.features[0].properties.ptptype;
+      document.getElementById("carRedSignal").checked = e.features[0].properties.carRedSignal;
+      document.getElementById("carTurnLeft").checked = e.features[0].properties.carTurnLeft;
+      document.getElementById("carTurnRight").checked = e.features[0].properties.carTurnRight;
+      document.getElementById("pedRedSignal").checked = e.features[0].properties.pedRedSignal;
+      document.getElementById("pedWrongCross").checked = e.features[0].properties.pedWrongCross;
+      document.getElementById("pedKid").checked = e.features[0].properties.pedKid;
+      document.getElementById("danger").checked = e.features[0].properties.danger;
+      document.getElementById("id_record_id").value = e.features[0].properties.id;
+  });
+
+  // Change the cursor to a pointer when the mouse is over the places layer.
+  map.on('mouseenter', 'ptp', function () {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+  // Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'ptp', function () {
+    map.getCanvas().style.cursor = '';
+  });
+
+
+
+  map.on('click', function (e) {
+
+    //if ($('#agree').prop('checked')==true)
+    if ($('#chbNewMarker').prop('checked')==true)
+    {
+        // удаляем предыдущий маркер, который поставили, если есть
+        var m = document.getElementById("marker");
+        if(m){ m.remove() }
+
+        var coords = e.lngLat;
+        document.getElementById("latitude").value = coords.lat;
+        document.getElementById("longitude").value = coords.lng;
+        document.getElementById("description").value = '';
+        document.getElementById("ptptype").value = '';
+        document.getElementById("carRedSignal").checked = false;
+        document.getElementById("carTurnLeft").checked = false;
+        document.getElementById("carTurnRight").checked = false;
+        document.getElementById("pedRedSignal").checked = false;
+        document.getElementById("pedWrongCross").checked = false;
+        document.getElementById("pedKid").checked = false;
+        document.getElementById("danger").checked = false;
+        document.getElementById("id_record_id").value = ''
+
+
+
+        //https://docs.mapbox.com/mapbox-gl-js/api/#marker
+        var el = document.createElement('div');
+        el.className = 'marker';
+        el.id = 'marker';
+        //el.style.backgroundImage = 'url(https://placekitten.com/g/' + marker.properties.iconSize.join('/') + '/)';
+        //el.style.backgroundImage = 'url(https://ssl.gstatic.com/images/icons/gplus-16.png)';
+
+        //el.style.width = marker.properties.iconSize[0] + 'px';
+        //el.style.height = marker.properties.iconSize[1] + 'px';
+
+        el.style.width = '16px';
+        el.style.height = '16px';
+
+        //el.addEventListener('click', function() {
+        //window.alert("Hello");
+        //});
+
+        var marker = new mapboxgl.Marker(el, { draggable: false })
+          .setLngLat([coords.lng, coords.lat])
+          .addTo(map);
+    }
+
+
+    $('#chbNewMarker').prop('checked',false);
+    map.getCanvas().style.cursor = '';
+
+
+  });
+
+
+
+  map.addControl(new MapboxGeocoder({
+  accessToken: mapboxgl.accessToken,
+  mapboxgl: mapboxgl
+  }));
+
+
+</script>
+
+
+
+
+<script>
+  $(function () {
+    $("#datetime").datetimepicker({
+      format: 'd/m/Y H:i',
+    });
+  });
+</script>
+
+
+<script>
+
+
+
+
+
+$("#searchaddress").keyup(function(event){
+    if(event.keyCode == 13){
+        event.preventDefault();
+
+        //https://nominatim.org/release-docs/develop/api/Search/#examples
+        var urlSearch = "https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q=" + $("#searchaddress").val() + "&format=json&limit=1";
+
+        $.ajax({
+          url: urlSearch,
+          dataType: "json",
+          context: document.body,
+          success: function(jsondata){
+            map.setCenter([jsondata[0].lon, jsondata[0].lat]);
+            map.setZoom(17);
+
+          }
+        });
+    }
+});
+
+
+$('#chbNewMarker').click(function() {
+  if ($('#chbNewMarker').prop('checked')==true)
+  {
+    map.getCanvas().style.cursor = 'crosshair';
+  } else {
+    map.getCanvas().style.cursor = '';
+  }
+});
+
+
+</script>
+
+
+</body>
+</html>
