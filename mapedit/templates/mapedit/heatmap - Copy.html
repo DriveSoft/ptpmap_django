@@ -219,7 +219,7 @@
     <div class='map-overlay-inner'>
         <h2>Години</h2>
         <label id='year'></label>
-        <input id='slider' type='range' min='{{fromYear}}' max='{{toYear}}' step='1' value='{{fromYear}}' /> <!-- 2014 год костыль, чтобы показать все данные, т.к. за 2014г данных нет -->
+        <input id='slider' type='range' min='2014' max='2019' step='1' value='2014' /> <!-- 2014 год костыль, чтобы показать все данные, т.к. за 2014г данных нет -->
 
 		<br><br>
 
@@ -355,7 +355,7 @@ https://www.mapbox.com/mapbox-gl-js/api/
 		var ar_pedKid;
 
 		// Slider
-		if (year === {{fromYear}}) { // костыль, если 2014, тогда смотрим все записи
+		if (year === 2014) { // костыль, если 2014, тогда смотрим все записи
 			//var filters = null;
 			document.getElementById('year').textContent = 'Всички';
 		} else {
@@ -498,7 +498,51 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
 	map.on('load', function() {
 
-    var data = {{ jsonfile|safe }}
+
+
+      var data =
+{{ jsonfile|safe }}
+      {
+          "type": "FeatureCollection",
+          "features": [
+
+
+              {% if ptp_data %}
+              {% for ptp in ptp_data %}
+              {
+
+                  "type": "Feature",
+                  "geometry": {
+                      "type": "Point",
+                      "coordinates": [{{ptp.longitude}}, {{ptp.latitude}}]
+                  },
+
+                  "properties": {
+                      "id": {{ptp.id}},
+                      "city": {{ ptp.city_id }},
+                      "DateTime": "{{ptp.datetime|date:"d/m/Y H:i"}}",
+                      //"DateTime": "{{ptp.datetime|date:"Y-m-d\TH:i:00.000\Z"}}",
+                      "ptptype": "{{ ptp.ptptype }}",
+                      "carRedSignal": "{{ ptp.carRedSignal|yesno:"1,0" }}",
+                      "carTurnLeft": "{{ ptp.carTurnLeft|yesno:"1,0" }}",
+                      "carTurnRight": "{{ ptp.carTurnRight|yesno:"1,0" }}",
+                      "pedRedSignal": "{{ ptp.pedRedSignal|yesno:"1,0" }}",
+                      "pedWrongCross": "{{ ptp.pedWrongCross|yesno:"1,0" }}",
+                      "pedKid": "{{ ptp.pedKid|yesno:"1,0" }}",
+                      "danger": "{{ ptp.danger|yesno:"1,0" }}",
+                      "year": {{ptp.datetime|date:"Y"}},
+                      "month": {{ptp.datetime|date:"n"}},
+                      "hours": {{ptp.datetime|date:"G"}},
+                      "description": "{{ ptp.description }}",
+                  }
+
+              },
+              {% endfor %}
+              {% endif %}
+          ]
+      };
+
+
 
 
 		// Pedestrians
@@ -653,7 +697,7 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
 
         // Set filter to see all records
-        filterBy({{fromYear}});
+        filterBy(2014);
 
         document.getElementById('slider').addEventListener('input', function(e) {
             var year = parseInt(e.target.value, 10);

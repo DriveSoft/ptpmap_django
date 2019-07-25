@@ -10,7 +10,10 @@ from .forms import *
 import json
 from django.contrib.staticfiles import finders
 import datetime
-
+from django.core.files import File
+import io
+import os
+from django.conf import settings as djangoSettings
 
 
 
@@ -152,7 +155,85 @@ class HeatMap(View):
 
     def get(self, request, city_name):
         CityObj = get_object_or_404(city, sysname = city_name)
+        #ptp_data = ptp.objects.filter(city_id=CityObj.id) # из базы получаем данные
+
+        # из JSON файла получаем данные (папка STATIC)
+        #with open(finders.find(city_name+'.json'), encoding='utf-8') as read_file:
+        with open('./mapedit/dataptp/'+city_name+'.json', encoding='utf-8') as read_file: #./static/
+            jsonfile = json.load(read_file)
+
+        fromYear = jsonfile["fromYear"]
+        toYear = jsonfile["toYear"]
+
+        context = {'CityObj': CityObj, 'jsonfile': jsonfile, 'fromYear': fromYear, 'toYear': toYear}
+        #context = {'ptp_data': ptp_data, 'CityObj': CityObj, 'jsonfile': jsonfile}
+        return render(request, self.template, context)
+
+
+
+class UpdateData(View):
+    def get(self, request, city_name):
+        CityObj = get_object_or_404(city, sysname = city_name)
         #ptp_data = ptp.objects.all()
         ptp_data = ptp.objects.filter(city_id=CityObj.id)
-        context = {'ptp_data': ptp_data, 'CityObj': CityObj} #, 'lat': lat, 'lng': lng
-        return render(request, self.template, context)
+
+        #print(ptp_data.aggregate(Max('datetime')).year())
+        arg = ptp_data.order_by('datetime').first()
+        fromYear = arg.datetime.year
+        fromYear -= 1 #костыль, -1 год значит показываем в шаблоне все дтп
+
+        arg = ptp_data.order_by('-datetime').first()
+        toYear = arg.datetime.year
+
+
+        ptpJsonData = {
+            "type": "FeatureCollection",
+            "fromYear": fromYear,
+            "toYear": toYear,
+            "features": []
+        }
+
+        if ptp_data:
+            for ptpItem in ptp_data:
+                ptpJson = {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [ptpItem.longitude, ptpItem.latitude]
+                  },
+
+                  "properties": {
+                    "id": ptpItem.id,
+                    "city": ptpItem.city_id,
+                    "DateTime": ptpItem.datetime.strftime("%d/%m/%Y %H:%M"),
+                    "ptptype": '{}'.format(ptpItem.ptptype),
+                    "carRedSignal": int(ptpItem.carRedSignal),
+                    "carTurnLeft": int(ptpItem.carTurnLeft),
+                    "carTurnRight": int(ptpItem.carTurnRight),
+                    "pedRedSignal": int(ptpItem.pedRedSignal),
+                    "pedWrongCross": int(ptpItem.pedWrongCross),
+                    "pedKid": int(ptpItem.pedKid),
+                    "danger": int(ptpItem.danger),
+                    "year": ptpItem.datetime.year,
+                    "month": ptpItem.datetime.month,
+                    "hours": ptpItem.datetime.hour,
+                    "description": '{}'.format(ptpItem.description),
+                  }
+                }
+
+                ptpJsonData["features"].append(ptpJson)
+
+
+        #with io.open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
+        #print('FF'+os.path.join(djangoSettings.BASE_DIR, "/static"))
+        with io.open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
+            myfile = File(f)
+            myfile.write( json.dumps(ptpJsonData, ensure_ascii=False) )
+
+        myfile.closed
+        f.closed
+        return HttpResponse("Updated")
+
+
+        #context = {'ptp_data': ptp_data, 'CityObj': CityObj} #, 'lat': lat, 'lng': lng
+        #return render(request, self.template, context)
