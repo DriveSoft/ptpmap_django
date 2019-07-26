@@ -183,7 +183,7 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
     <div class="form-group form-check">
         <input type="checkbox" name="carTurnRight" class="form-check-input" id="carTurnRight">
-        <label class="form-check-label" for="carTurnLeft">При завой надясно (МПС)</label>
+        <label class="form-check-label" for="carTurnRight">При завой надясно (МПС)</label>
     </div>
 
     <div class="form-group form-check">
@@ -222,6 +222,10 @@ https://www.mapbox.com/mapbox-gl-js/api/
     <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
   {% endif %}
 
+<br>
+<a class="btn btn-primary" href="{% url 'updatedata' CityObj.sysname %}" role="button" target="_blank">Update data and open heatmap</a>
+
+
 </div>
 
 
@@ -237,7 +241,7 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
 <div id="ck-button">
    <label>
-      <input type="checkbox" value="1" id="chbNewMarker"><span>Marker</span>
+      <input type="checkbox" value="1" id="chbNewMarker"><span>Ново ПТП</span>
    </label>
 </div>
 

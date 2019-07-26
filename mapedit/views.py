@@ -140,7 +140,8 @@ class HeatMap(View):
 
         # из JSON файла получаем данные
         #with open(finders.find(city_name+'.json'), encoding='utf-8') as read_file:
-        with open('./mapedit/dataptp/'+city_name+'.json', encoding='utf-8') as read_file:
+        #with open('./mapedit/dataptp/'+city_name+'.json', encoding='utf-8') as read_file:
+        with open(os.path.join(djangoSettings.BASE_DIR, 'mapedit/dataptp/')+city_name+'.json', encoding='utf-8') as read_file:
             jsonfile = json.load(read_file)
 
         fromYear = jsonfile["fromYear"]
@@ -201,7 +202,9 @@ class UpdateData(View):
                 ptpJsonData["features"].append(ptpJson)
 
 
-        with open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
+        #with open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
+        with open(os.path.join(djangoSettings.BASE_DIR, 'mapedit/dataptp/')+city_name+'.json', 'w', encoding='utf8') as f:
+
             f.write( json.dumps(ptpJsonData, ensure_ascii=False) )
             #myfile = File(f)
             #myfile.write( json.dumps(ptpJsonData, ensure_ascii=False) )
@@ -209,4 +212,5 @@ class UpdateData(View):
 
         #myfile.closed
         #f.closed
-        return HttpResponse("Updated")
+        #return HttpResponse("Updated")
+        return redirect('heatmap', city_name = city_name)
