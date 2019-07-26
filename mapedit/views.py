@@ -11,22 +11,18 @@ import json
 from django.contrib.staticfiles import finders
 import datetime
 from django.core.files import File
-import io
 import os
 from django.conf import settings as djangoSettings
 
 
 
 
-class EditorView(LoginRequiredMixin, View):
+class EditorView(LoginRequiredMixin, View): # без LoginRequiredMixin не работает перенаправление на страницу, с которой было перенаправление на страницу login
     template = 'mapedit/editor.html'
-    #login_url = '/login/'
-    #redirect_field_name = 'redirect_to'
 
     def get(self, request, city_name):
         if request.user.is_authenticated:
             CityObj = get_object_or_404(city, sysname = city_name)
-            #CityObj = city.objects.get(sysname = city_name) # получаем id города, который используется
 
             isAllow = UserCity.objects.filter(city_id=CityObj.id, user_id=request.user.id).count() # проверяем есть ли у пользователя разрешение для данного города
             if isAllow > 0 or request.user.is_staff:
@@ -34,10 +30,8 @@ class EditorView(LoginRequiredMixin, View):
                 ptp_data = ptp.objects.filter(city_id=CityObj.id)
                 context = {'CityObj': CityObj, 'ptp_data': ptp_data, 'form': form, 'lat': request.GET.get('lat'), 'lng': request.GET.get('lng')  } #, 'lat': lat, 'lng': lng
                 return render(request, self.template, context)
-
             else:
                 return HttpResponse("Access denied")
-
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -45,15 +39,9 @@ class EditorView(LoginRequiredMixin, View):
     def post(self, request, city_name):
         if request.user.is_authenticated:
             CityObj = get_object_or_404(city, sysname = city_name)
-            #print(idCity)
-
-            #isAllow = UserCity.objects.filter(city_id=request.POST.get('city'), user_id=request.user.id).count() # проверяем есть ли у пользователя разрешение для данного города
             isAllow = UserCity.objects.filter(city_id=CityObj.id, user_id=request.user.id).count() # проверяем есть ли у пользователя разрешение для данного города
 
-            #print(UserCity.objects.get(city='sofia').id)
-
             if isAllow > 0 or request.user.is_staff:
-
                 record_id = request.POST.get('record_id') # получаем объект ptp если редактируем
 
                 if not request.POST._mutable:
@@ -61,17 +49,12 @@ class EditorView(LoginRequiredMixin, View):
 
                 request.POST['datetime'] = datetime.datetime.strptime(request.POST['datetime'], '%d/%m/%Y %H:%M').strftime(' %Y-%m-%d %H:%M:%S') #меняем формат даты для БД
 
-                #request.POST['datetime'] = '2019-01-01 00:00:00'
-                #print(request.POST.get('datetime'))
-
-                if record_id:
+                if record_id: #если в record_id есть id значит редактируем
                     ptp_object = get_object_or_404(ptp, pk=record_id)
                 else:
                     ptp_object = None
 
-
-                form = PTPForm(request.POST, instance=ptp_object) # заполняем форму данными из POST, такжа добавляется объекта записи, если редактируем
-
+                form = PTPForm(request.POST, instance=ptp_object) # заполняем форму данными из POST, такжа добавляется объект записи, если редактируем
 
                 if form.is_valid():
                     new_ptp = form.save(commit=False)
@@ -80,7 +63,6 @@ class EditorView(LoginRequiredMixin, View):
                     response = redirect('editor', city_name = CityObj.sysname)
                     response['Location'] += '?lat='+ str(new_ptp.latitude) + '&lng=' + str(new_ptp.longitude)
                     return response
-                    #return render(request, self.template, context={'form': form})
             else:
                 return HttpResponse("Access denied")
         else:
@@ -155,18 +137,15 @@ class HeatMap(View):
 
     def get(self, request, city_name):
         CityObj = get_object_or_404(city, sysname = city_name)
-        #ptp_data = ptp.objects.filter(city_id=CityObj.id) # из базы получаем данные
 
-        # из JSON файла получаем данные (папка STATIC)
+        # из JSON файла получаем данные
         #with open(finders.find(city_name+'.json'), encoding='utf-8') as read_file:
-        with open('./mapedit/dataptp/'+city_name+'.json', encoding='utf-8') as read_file: #./static/
+        with open('./mapedit/dataptp/'+city_name+'.json', encoding='utf-8') as read_file:
             jsonfile = json.load(read_file)
 
         fromYear = jsonfile["fromYear"]
         toYear = jsonfile["toYear"]
-
         context = {'CityObj': CityObj, 'jsonfile': jsonfile, 'fromYear': fromYear, 'toYear': toYear}
-        #context = {'ptp_data': ptp_data, 'CityObj': CityObj, 'jsonfile': jsonfile}
         return render(request, self.template, context)
 
 
@@ -174,10 +153,8 @@ class HeatMap(View):
 class UpdateData(View):
     def get(self, request, city_name):
         CityObj = get_object_or_404(city, sysname = city_name)
-        #ptp_data = ptp.objects.all()
         ptp_data = ptp.objects.filter(city_id=CityObj.id)
 
-        #print(ptp_data.aggregate(Max('datetime')).year())
         arg = ptp_data.order_by('datetime').first()
         fromYear = arg.datetime.year
         fromYear -= 1 #костыль, -1 год значит показываем в шаблоне все дтп
@@ -190,7 +167,7 @@ class UpdateData(View):
             "type": "FeatureCollection",
             "fromYear": fromYear,
             "toYear": toYear,
-            "features": []
+            "features": [] # сюда будем добавлять данные
         }
 
         if ptp_data:
@@ -224,16 +201,12 @@ class UpdateData(View):
                 ptpJsonData["features"].append(ptpJson)
 
 
-        #with io.open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
-        #print('FF'+os.path.join(djangoSettings.BASE_DIR, "/static"))
-        with io.open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
-            myfile = File(f)
-            myfile.write( json.dumps(ptpJsonData, ensure_ascii=False) )
+        with open('./mapedit/dataptp/'+city_name+'.json', 'w', encoding='utf8') as f:
+            f.write( json.dumps(ptpJsonData, ensure_ascii=False) )
+            #myfile = File(f)
+            #myfile.write( json.dumps(ptpJsonData, ensure_ascii=False) )
 
-        myfile.closed
-        f.closed
+
+        #myfile.closed
+        #f.closed
         return HttpResponse("Updated")
-
-
-        #context = {'ptp_data': ptp_data, 'CityObj': CityObj} #, 'lat': lat, 'lng': lng
-        #return render(request, self.template, context)
