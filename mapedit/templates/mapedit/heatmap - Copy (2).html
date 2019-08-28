@@ -1,17 +1,19 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>{{CityObj.cityname}}</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
 
-{% block title %}
-  {{CityObj.cityname}}
-{% endblock %}
-
-
-{% block styles %}
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css' rel='stylesheet' />
-<style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
+<!-- https://blog.mapbox.com/introducing-heatmaps-in-mapbox-gl-js-71355ada9e6c -->
 
 <!-- CheckBox -->
 <style>
@@ -157,10 +159,10 @@
 <!-- Filter by years -->
 <style>
 .map-overlay {
-    font: 16px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font: 12px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     position: absolute;
-    width: 170px;
-    top: 70px;
+    width: 150px;
+    top: 0;
     left: 0;
     padding: 10px;
 }
@@ -205,25 +207,23 @@
         font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     }
 </style>
-{% endblock %}
 
 
 
 
-{% block content %}
+
 <div id='map'></div>
-
 
 <!-- Filter by years -->
 <div class='map-overlay top'>
     <div class='map-overlay-inner'>
-        <strong>Години</strong>
+        <h2>Години</h2>
         <label id='year'></label>
         <input id='slider' type='range' min='{{fromYear}}' max='{{toYear}}' step='1' value='{{fromYear}}' /> <!-- 2014 год костыль, чтобы показать все данные, т.к. за 2014г данных нет -->
 
 		<br><br>
 
-		<strong>Тип</strong>
+		<h2>Тип</h2>
 		<div class="control-group">
 			<label id='labelradio1' class="control control-radio">
 				Всички
@@ -253,7 +253,7 @@
 		</div>
 
 
-		<strong>Допълнително</strong>
+		<h2>Допълнително</h2>
 		<div class="control-group">
 
 
@@ -305,9 +305,7 @@
 				<div class="control_indicator"></div>
 			</label>
 
-{% if user.is_authenticated %}
-<a class="btn btn-outline-secondary" href="{% url 'editor' CityObj.sysname %}" role="button">Редактиране</a>
-{% endif %}
+
 
 		</div>
 
@@ -468,13 +466,13 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
 */
 
-				if(input[i].getAttribute('id')=='danger') ar_danger = ['==', 'danger', 1];
-				if(input[i].getAttribute('id')=='carRedSignal') ar_carRedSignal = ['==', 'carRedSignal', 1];
-				if(input[i].getAttribute('id')=='carTurnLeft') ar_carTurnLeft = ['==', 'carTurnLeft', 1];
-				if(input[i].getAttribute('id')=='carTurnRight') ar_carTurnRight = ['==', 'carTurnRight', 1];
-				if(input[i].getAttribute('id')=='pedRedSignal') ar_pedRedSignal = ['==', 'pedRedSignal', 1];
-				if(input[i].getAttribute('id')=='pedWrongCross') ar_pedWrongCross = ['==', 'pedWrongCross', 1];
-				if(input[i].getAttribute('id')=='pedKid') ar_pedKid = ['==', 'pedKid', 1];
+				if(input[i].getAttribute('id')=='danger') ar_danger = ['==', 'danger', '1'];
+				if(input[i].getAttribute('id')=='carRedSignal') ar_carRedSignal = ['==', 'carRedSignal', '1'];
+				if(input[i].getAttribute('id')=='carTurnLeft') ar_carTurnLeft = ['==', 'carTurnLeft', '1'];
+				if(input[i].getAttribute('id')=='carTurnRight') ar_carTurnRight = ['==', 'carTurnRight', '1'];
+				if(input[i].getAttribute('id')=='pedRedSignal') ar_pedRedSignal = ['==', 'pedRedSignal', '1'];
+				if(input[i].getAttribute('id')=='pedWrongCross') ar_pedWrongCross = ['==', 'pedWrongCross', '1'];
+				if(input[i].getAttribute('id')=='pedKid') ar_pedKid = ['==', 'pedKid', '1'];
 			}
 		}
 
@@ -742,12 +740,6 @@ https://www.mapbox.com/mapbox-gl-js/api/
 
 });
 </script>
-{% endblock %}
 
-{% block scripts %}
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-{% endblock %}
+</body>
+</html>

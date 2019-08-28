@@ -1,0 +1,26 @@
+{% load static %}
+
+body {
+  background-color: #f8f8f8;
+}
+
+
+
+
+
+.cities {
+    background-color: #1abc9c!important;
+}
+
+
+.page-section {
+    padding: 6rem 0;
+    margin-bottom: -30px;
+}
+
+
+.footer {
+  padding: 2rem 0;
+  margin-top: 3rem;
+  color: #ffffff;
+}

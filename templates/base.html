@@ -1,0 +1,120 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+  {% block styles %}
+  {% endblock %}
+
+
+
+
+  <title>
+    {% block title %}
+      Blog Engine
+    {% endblock %}
+  </title>
+</head>
+
+<body id="page-top">
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/bg_BG/sdk.js#xfbml=1&version=v4.0"></script>
+
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+      <div class="container"> <!-- чтобы меню выравнить по центру -->
+        <a class="navbar-brand" href="/#page-top">
+          <img src="{% static "/images/logo.png" %}" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/#page-top">Начало <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/#aboutus">За нас</a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Град
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="/maps/sofia/heatmap/">София</a>
+                <a class="dropdown-item" href="/maps/plovdiv/heatmap/">Пловдив</a>
+                <a class="dropdown-item" href="/maps/varna/heatmap/">Варна</a>
+                <a class="dropdown-item" href="/maps/burgas/heatmap/">Бургас</a>
+                <a class="dropdown-item" href="/maps/ruse/heatmap/">Русе</a>
+                <a class="dropdown-item" href="/maps/stara-zagora/heatmap/">Стара-Загора</a>
+                <a class="dropdown-item" href="/maps/pleven/heatmap/">Плевен</a>
+                <a class="dropdown-item" href="/maps/dobrich/heatmap/">Добрич</a>
+                <a class="dropdown-item" href="/maps/sliven/heatmap/">Сливен</a>
+                <a class="dropdown-item" href="/maps/shumen/heatmap/">Шумен</a>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/#member">Стани член</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/#articles">Материали</a>
+            </li>
+          </ul>
+
+
+          <ul class="navbar-nav mr-auto">
+
+            {% if user.is_authenticated %}
+              <span class="navbar-text">
+                {{ user.get_username }}
+              </span>
+
+              <form class="form-inline ml-2">
+                <a class="btn btn-outline-secondary" href="{% url 'logout'%}?next={{request.path}}" role="button">Изход</a>
+              </form>
+
+            {% else %}
+            <form class="form-inline">
+              <a class="btn btn-outline-secondary" href="{% url 'login'%}?next={{request.path}}" role="button">Вход</a>
+            </form>
+            {% endif %}
+
+          </ul>
+
+        </div>
+      </div>
+    </nav>
+
+
+
+
+
+
+    {% block content %}
+      There is no any content
+    {% endblock %}
+
+
+
+
+
+
+
+    {% block scripts %}
+    {% endblock %}
+
+
+  </body>
+</html>

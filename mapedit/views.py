@@ -27,7 +27,7 @@ class EditorView(LoginRequiredMixin, View): # без LoginRequiredMixin не р�
             isAllow = UserCity.objects.filter(city_id=CityObj.id, user_id=request.user.id).count() # проверяем есть ли у пользователя разрешение для данного города
             if isAllow > 0 or request.user.is_staff:
                 form = PTPForm()
-                ptp_data = ptp.objects.filter(city_id=CityObj.id)
+                ptp_data = ptp.objects.filter(city_id=CityObj.id) # получаем все ПТП для данного города
                 context = {'CityObj': CityObj, 'ptp_data': ptp_data, 'form': form, 'lat': request.GET.get('lat'), 'lng': request.GET.get('lng')  } #, 'lat': lat, 'lng': lng
                 return render(request, self.template, context)
             else:
@@ -58,7 +58,7 @@ class EditorView(LoginRequiredMixin, View): # без LoginRequiredMixin не р�
 
                 if form.is_valid():
                     new_ptp = form.save(commit=False)
-                    new_ptp.city_id = CityObj.id
+                    new_ptp.city_id = CityObj.id # присваиваем id города, т.к. на форме нет компонента для выбора города
                     new_ptp = form.save()
                     response = redirect('editor', city_name = CityObj.sysname)
                     response['Location'] += '?lat='+ str(new_ptp.latitude) + '&lng=' + str(new_ptp.longitude)

@@ -1,19 +1,17 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block title %}
-  {{CityObj.cityname}}
-{% endblock %}
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-
-{% block styles %}
-
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-
-<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet' />
@@ -21,10 +19,12 @@
 
 
 
+  <title>Карта за ПТП в България</title>
+
+
     <style>
         body { margin:0; padding:0; width: 100%; height: 100%;}
-        html { height: 100%; }
-        #map { position: absolute; left:0; top:50; bottom:0; height: 100%; width:100%; }
+        #map { position: absolute; top:0; bottom:0; width:100%; }
 
         #markerbutton {
             font: 12px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -64,7 +64,7 @@
 
            #ck-button {
              position: absolute;
-             left: 10px; top: 80px;
+             left: 10px; top: 10px;
              background-color:#EFEFEF;
              border-radius:4px;
              border:1px solid #D0D0D0;
@@ -106,37 +106,26 @@
            }
 
 
-
-           .my-sidebar {
-               -ms-flex: 0 0 400px;
-               flex: 0 0 400px;
-           }
-
-
-
-
     </style>
 
-{% endblock %}
+</head>
+<body>
 
 
 
-{% block content %}
 
 <!--
 https://www.mapbox.com/mapbox-gl-js/api/
 -->
+<div id="left">
+  <div id='map'></div>
+</div>
 
 
-<div class="container-fluid h-100">
-  <div class="row h-100">
-    <div class="col">
-      <div id='map'></div>
-    </div>
 
-    <div class="col my-sidebar h-100" style="padding-top:70px">
 
-    <form action="{% url 'editor' CityObj.sysname %}" method="post">
+<div id="right" style="padding: 10px;">
+  <form action="{% url 'editor' CityObj.sysname %}" method="post">
     {% csrf_token %}
 
 
@@ -150,48 +139,35 @@ https://www.mapbox.com/mapbox-gl-js/api/
       </select>-->
     </div>
 
-    <div class="row">
-      <div class="col">
-        <div class="form-group">Latitude
-            <input type="number" name="latitude" class="form-control form-control-sm" id="latitude" step="any" required>
-        </div>
-      </div>
+    <div class="form-group">Latitude
+        <input type="number" name="latitude" class="form-control form-control-sm" id="latitude" step="any" required>
+    </div>
 
-      <div class="col">
-        <div class="form-group">Longitude
-            <input type="number" name="longitude" class="form-control form-control-sm" id="longitude" step="any" required>
-        </div>
-      </div>
+    <div class="form-group">Longitude
+        <input type="number" name="longitude" class="form-control form-control-sm" id="longitude" step="any" required>
     </div>
 
     <div class="form-group">Описание
         <textarea name="description" cols="40" rows="10" class="form-control form-control-sm" id="description" required></textarea>
     </div>
 
-
-    <div class="row">
-      <div class="col">
-        <div class="form-group">Дата и време<br>
-            <input name="datetime" id="datetime" type="text" autocomplete="off" required>
-        </div>
-      </div>
+    <div class="form-group">Дата и време<br>
+        <input name="datetime" id="datetime" type="text" autocomplete="off" required>
+    </div>
 
 
     <!-- <div class="form-group">Datetime
         <input type="text" name="datetime" class="form-control form-control-sm" id="datetime" required>
     </div> -->
-      <div class="col">
-        <div class="form-group">Тип
-            <select name="ptptype" class="form-control form-control-sm" id="ptptype" required>
-              <option value="" selected>---------</option>
-              <option value="1">Пешеходци</option>
-              <option value="2">Кола</option>
-              <option value="3">Велосипед</option>
-              <option value="4">Мотоциклет</option>
-            </select>
-        </div>
-      </div>
 
+    <div class="form-group">Тип
+        <select name="ptptype" class="form-control form-control-sm" id="ptptype" required>
+          <option value="" selected>---------</option>
+          <option value="1">Пешеходци</option>
+          <option value="2">Кола</option>
+          <option value="3">Велосипед</option>
+          <option value="4">Мотоциклет</option>
+        </select>
     </div>
 
 
@@ -250,9 +226,6 @@ https://www.mapbox.com/mapbox-gl-js/api/
 <a class="btn btn-primary" href="{% url 'updatedata' CityObj.sysname %}" role="button" target="_blank">Update data and open heatmap</a>
 
 
-
-</div>
-</div>
 </div>
 
 
@@ -526,16 +499,11 @@ $('#chbNewMarker').click(function() {
 
 </script>
 
-{% endblock %}
+</body>
 
-
-{% block scripts %}
 <!-- XDSoft DateTimePicker -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
 
 
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-
-{% endblock %}
+</html>
